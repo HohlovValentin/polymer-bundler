@@ -458,10 +458,17 @@ suite('Bundler', () => {
       assert.equal(imports.length, 1);
     });
 
-    test.skip('Excluded CSS is not inlined', async () => {
+    test('Excluded CSS is not inlined', async () => {
       const doc = await bundle(
           inputPath, {inlineCss: true, excludes: ['imports/simple-style.css']});
       assert.include(parse5.serialize(doc), 'href="imports/simple-style.css"');
+    });
+
+    test('Excluded script is not inlined', async () => {
+      const doc = await bundle(
+          'test/html/scripts.html',
+          {inlineScripts: true, excludes: ['external/external.js']});
+      assert.include(parse5.serialize(doc), 'src="external/external.js"');
     });
 
     test('Excluded comments are removed', async () => {

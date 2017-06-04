@@ -16,6 +16,7 @@ import * as dom5 from 'dom5';
 import * as parse5 from 'parse5';
 import {ASTNode, serialize, treeAdapters} from 'parse5';
 import * as path from 'path';
+import * as urlLib from 'url';
 import {Analyzer, Document, FSUrlLoader, InMemoryOverlayUrlLoader} from 'polymer-analyzer';
 
 import * as astUtils from './ast-utils';
@@ -294,6 +295,23 @@ export class Bundler {
   }
 
   /**
+   * Resolve the given URL relative to the provided document and then check
+   * whether or not it is listed in the `excludes` array.
+   */
+  private _isUrlExcluded(document: Document, rawUrl: UrlString): boolean {
+    const url = urlLib.resolve(document.url, rawUrl);
+    if (!this.analyzer.canResolveUrl(url)) {
+      return false;
+    }
+    const resolvedUrl = this.analyzer.resolveUrl(url);
+    const excludeIndex = this.excludes.findIndex((exclude) => {
+      const excludeAsFolder = exclude.endsWith('/') ? exclude : exclude + '/';
+      return resolvedUrl === exclude || resolvedUrl.startsWith(excludeAsFolder);
+    });
+    return excludeIndex > -1;
+  }
+
+  /**
    * Given a document, search for the hidden div, if it isn't found, then
    * create it.  After creating it, attach it to the desired location.  Then
    * return it.
@@ -396,6 +414,8 @@ export class Bundler {
     const visitedUrls = new Set<UrlString>();
     const htmlImports = dom5.queryAll(ast, matchers.htmlImport);
     for (const htmlImport of htmlImports) {
+      // Any excluded HTML imports would be filtered out before reaching this
+      // point by this._filterExcludesFromBundles() when building manifest.
       await importUtils.inlineHtmlImport(
           this.analyzer,
           document,
@@ -418,8 +438,11 @@ export class Bundler {
       bundle: AssignedBundle): Promise<void> {
     const scriptImports = dom5.queryAll(ast, matchers.externalJavascript);
     for (const externalScript of scriptImports) {
-      await importUtils.inlineScript(
-          this.analyzer, document, externalScript, bundle, this.sourcemaps);
+      const rawUrl = dom5.getAttribute(externalScript, 'src')!;
+      if (!this._isUrlExcluded(document, rawUrl)) {
+        await importUtils.inlineScript(
+            this.analyzer, document, externalScript, bundle, this.sourcemaps);
+      }
     }
   }
 
@@ -434,10 +457,13 @@ export class Bundler {
       bundle: AssignedBundle) {
     const cssImports = dom5.queryAll(ast, matchers.stylesheetImport);
     for (const cssLink of cssImports) {
-      const style = await importUtils.inlineStylesheet(
-          this.analyzer, document, cssLink, bundle);
-      if (style) {
-        this._moveDomModuleStyleIntoTemplate(style);
+      const rawUrl = dom5.getAttribute(cssLink, 'href')!;
+      if (!this._isUrlExcluded(document, rawUrl)) {
+        const style = await importUtils.inlineStylesheet(
+            this.analyzer, document, cssLink, bundle);
+        if (style) {
+          this._moveDomModuleStyleIntoTemplate(style);
+        }
       }
     }
   }
@@ -453,8 +479,11 @@ export class Bundler {
       bundle: AssignedBundle) {
     const cssLinks = dom5.queryAll(ast, matchers.externalStyle);
     for (const cssLink of cssLinks) {
-      await importUtils.inlineStylesheet(
-          this.analyzer, document, cssLink, bundle);
+      const rawUrl = dom5.getAttribute(cssLink, 'href')!;
+      if (!this._isUrlExcluded(document, rawUrl)) {
+        await importUtils.inlineStylesheet(
+            this.analyzer, document, cssLink, bundle);
+      }
     }
   }
 
