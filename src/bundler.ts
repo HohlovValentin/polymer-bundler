@@ -16,8 +16,8 @@ import * as dom5 from 'dom5';
 import * as parse5 from 'parse5';
 import {ASTNode, serialize, treeAdapters} from 'parse5';
 import * as path from 'path';
-import * as urlLib from 'url';
 import {Analyzer, Document, FSUrlLoader, InMemoryOverlayUrlLoader} from 'polymer-analyzer';
+import * as urlLib from 'url';
 
 import * as astUtils from './ast-utils';
 import * as bundleManifestLib from './bundle-manifest';
