@@ -1,5 +1,8 @@
 node_modules
-example/bower_components
-**/.DS_Store
-typings
-lib
+# npmignore
+example
+CHANGELOG.md
+README.md
+util
+test
+.vscode
