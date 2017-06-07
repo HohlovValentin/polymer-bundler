@@ -1,5 +1,8 @@
 node_modules
 example/bower_components
 **/.DS_Store
-typings
-lib
+example
+CHANGELOG.md
+README.md
+util
+test
