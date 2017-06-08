@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+- Fixed issue with the `--exclude` option not working for styles and scripts. https://github.com/Polymer/polymer-bundler/issues/530
 <!-- Add new, unreleased changes here. -->
 
 ## 2.0.3 - 2017-06-07
