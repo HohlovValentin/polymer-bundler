@@ -6,7 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+- Fixed issue with the `--exclude` option not working for styles and scripts. https://github.com/Polymer/polymer-bundler/issues/530
+- Fixed issue with incorrect URL rewrites in inlined CSS (when URL points outside of the package root). https://github.com/Polymer/polymer-bundler/issues/531
 <!-- Add new, unreleased changes here. -->
+
+## 2.0.3 - 2017-06-07
+- Fixed issue with lazy-imports impacting bundle inlining logic. https://github.com/Polymer/polymer-bundler/issues/536
+- Fixed issue with hidden div being created inside dom-modules. https://github.com/Polymer/polymer-bundler/issues/535
+- Fixed issue with injected dependencies inside dom-modules in shell when using lazy-imports. https://github.com/Polymer/polymer-bundler/issues/534
 
 ## 2.0.2 - 2017-06-02
 - In cases such as the shell merge strategy, imports which are not originally
